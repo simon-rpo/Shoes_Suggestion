@@ -1,0 +1,66 @@
+{
+    "data": {
+        "predictions": [
+            0.0005831198650412261,
+            0.9994169473648071,
+            7.080764419242769e-9
+        ],
+        "max_prob": 0.9994169473648071,
+        "classes": 1,
+        "suggestions": [
+            [
+                {
+                    "displayLink": "stockx.com",
+                    "title": "Buy & Sell Deadstock Shoes - Real Yeezys, Retro Jordans, Nike",
+                    "link": "https://stockx.com/sneakers"
+                },
+                {
+                    "displayLink": "www.goat.com",
+                    "title": "GOAT: Buy and Sell Authentic Sneakers",
+                    "link": "https://www.goat.com/"
+                },
+                {
+                    "displayLink": "sneakernews.com",
+                    "title": "Where To Buy Store Lists for Sneakers | SneakerNews.com",
+                    "link": "https://sneakernews.com/tag/where-to-buy/"
+                },
+                {
+                    "displayLink": "www.flightclub.com",
+                    "title": "Flight Club: Sneakers. Here.",
+                    "link": "https://www.flightclub.com/"
+                },
+                {
+                    "displayLink": "www.kixify.com",
+                    "title": "Buy & Sell Sneakers | Kixify Marketplace",
+                    "link": "https://www.kixify.com/"
+                },
+                {
+                    "displayLink": "www.amazon.com",
+                    "title": "Republicans Buy Sneakers Too: How the Left Is Ruining Sports with ...",
+                    "link": "https://www.amazon.com/Republicans-Buy-Sneakers-Too-Politics/dp/0062878530"
+                },
+                {
+                    "displayLink": "www.highsnobiety.com",
+                    "title": "15 Best Sneaker Websites to Buy Your Kicks in 2018",
+                    "link": "https://www.highsnobiety.com/p/best-sneaker-websites/"
+                },
+                {
+                    "displayLink": "www.latimes.com",
+                    "title": "Those Nikes — buy, sell or hold? Sneakers are now assets trading ...",
+                    "link": "https://www.latimes.com/business/la-fi-sneakers-wall-street-stockx-reseller-20190419-story.html"
+                },
+                {
+                    "displayLink": "www.engadget.com",
+                    "title": "The best apps for buying sneakers",
+                    "link": "https://www.engadget.com/2019/04/10/best-apps-buying-sneakers-shoes-stockx-goat-sneakercon-ebay/"
+                },
+                {
+                    "displayLink": "slate.com",
+                    "title": "Did Michael Jordan really say “Republicans buy sneakers, too”?",
+                    "link": "https://slate.com/culture/2016/07/did-michael-jordan-really-say-republicans-buy-sneakers-too.html"
+                }
+            ]
+        ]
+    },
+    "url": "http://127.0.0.1:5000/api/shoes/suggestion"
+}
