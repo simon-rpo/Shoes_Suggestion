@@ -21,7 +21,7 @@ HUB_INCEPTION_V3 = "https://tfhub.dev/google/imagenet/inception_v3/classificatio
 def cnn_model_fn(features, labels, mode):
     # Load Inception-v3 model.
      # Load Inception-v3 model.
-    module = hub.Module(HUB_INCEPTION_V3)
+    module = hub.Module(HUB_INCEPTION_V3, trainable=True)
 
     input_layer = tf.reshape(features["x"], [-1, 299, 299, 3])
 
@@ -36,8 +36,13 @@ def cnn_model_fn(features, labels, mode):
     avgPool = tf.layers.average_pooling2d(
         middle_output, (2, 2), (2, 2), padding='same')
 
+    logits1 = tf.layers.dense(
+        inputs=avgPool,
+        units=350,
+        activation=tf.nn.relu)
+
     dropout1 = tf.layers.dropout(
-        inputs=avgPool, rate=0.4, training=mode == tf.estimator.ModeKeys.TRAIN)
+        inputs=logits1, rate=0.4, training=mode == tf.estimator.ModeKeys.TRAIN)
 
     flatten = tf.layers.flatten(dropout1)
 
@@ -85,11 +90,11 @@ def cnn_model_fn(features, labels, mode):
 def main(unused_argv):
     with tf.Graph().as_default() as g:
             # Load training and eval data
-        ftrain = h5py.File(DATA_DIR + 'train_dataset.h5', 'r')
-        ftest = h5py.File(DATA_DIR + 'test_dataset.h5', 'r')
+        ftrain = h5py.File(DATA_DIR + 'train_dataset_1_.h5', 'r')
+        ftest = h5py.File(DATA_DIR + 'test_dataset_1_.h5', 'r')
 
-        train_data, train_labels = ftest['test_set_x'], ftest['test_set_y']
-        eval_data, eval_labels = ftrain['train_set_x'],  ftrain['train_set_y']
+        train_data, train_labels = ftrain['train_set_x'],  ftrain['train_set_y']
+        eval_data, eval_labels = ftest['test_set_x'], ftest['test_set_y']
 
         train_data = np.asarray(train_data, dtype=np.float32)
         # train_data = train_data/255.
