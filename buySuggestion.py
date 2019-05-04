@@ -8,13 +8,6 @@ api_url_base = os.getenv("API_BASE_SEARCH")
 GOOGLE_SEARCH_APIKEY = os.getenv("GOOGLE_SEARCH_APIKEY")
 GOOGLE_SEARCH_CONTEXT = os.getenv("GOOGLE_SEARCH_CONTEXT")
 
-predictedClasses = {
-    'sandals': 0,
-    'sneakers': 1,
-    'high_heels': 2,
-    'boots': 3
-}
-
 
 def get_base_url():
     return '{0}'.format(api_url_base)
@@ -35,7 +28,7 @@ def getSuggestionsInfo(predictClass):
     params = {
         'key': GOOGLE_SEARCH_APIKEY,
         'cx': GOOGLE_SEARCH_CONTEXT,
-        'q': buildQueryPerClass(predictClass)
+        'q': buildQueryPerClass(predictClass, single=True)
     }
 
     response = requests.get(
@@ -62,10 +55,44 @@ def parseResponseSuggestions(data):
     return sugg
 
 
-def buildQueryPerClass(pred):
-    return {
+def buildQueryPerClass(pred, single):
+    className = {
         0: 'buy Sandals',
         1: 'buy Sneakers',
         2: 'buy High Heels',
         3: 'buy Boots'
     }[pred]
+
+    if single:
+        return className
+    else:
+        return buildTopTenQuery(className)
+
+
+def buildTopTenQuery(pred):
+    stringBuilder = ''
+    i = 0
+    for item in topTenSites():
+        if item in ('Adidas', 'Nike'):
+            stringBuilder = stringBuilder[:-3]
+            break
+        else:
+            stringBuilder = stringBuilder + item + (' OR ', '')[i == 9]
+        i += 1
+    print(stringBuilder)
+    return stringBuilder+' '+pred
+
+
+def topTenSites():
+    return [
+        'Zappos',
+        'HauteLook',
+        '6pm',
+        'Nordstrom Rack',
+        'Zulily',
+        'DSW',
+        'Overstock',
+        'Adidas',
+        'Nike',
+        'Designer Brands'
+    ]

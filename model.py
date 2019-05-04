@@ -1,4 +1,3 @@
-# Lastest Version
 from __future__ import absolute_import, division, print_function
 
 import os
@@ -7,46 +6,69 @@ import cv2
 import h5py
 import matplotlib.pyplot as plt
 import numpy as np
-import skimage.color
 import tensorflow as tf
 import tensorflow_hub as hub
 
 tf.logging.set_verbosity(tf.logging.INFO)
 
+# Model Vars
 MODEL_PATH = os.getenv("MODEL_PATH")
 DATA_DIR = 'C:\\Users\\PC\\Downloads\\test_Conv\\Convolutional Models\\DatasetCreation\\data_shoes\\new_set\\'
 HUB_INCEPTION_V3 = "https://tfhub.dev/google/imagenet/inception_v3/classification/1"
 
+# Hyperparameters
+BATCH_SIZE = 32
+EPOCHS = 50
+GLOBAL_STEPS = 1000
+LEARNING_RATE = 1e-4
+
 
 def cnn_model_fn(features, labels, mode):
     # Load Inception-v3 model.
-     # Load Inception-v3 model.
     module = hub.Module(HUB_INCEPTION_V3, trainable=True)
 
     input_layer = tf.reshape(features["x"], [-1, 299, 299, 3])
 
+    # Load Inception-v3 with layers signatures
     outputs = module(dict(images=input_layer),
                      signature="image_classification",
                      as_dict=True)
 
-    # print(outputs.items())
-
+    # Bottleneck layer to start FC
+    # INPUTS
     middle_output = outputs["InceptionV3/Mixed_7c"]
 
-    avgPool = tf.layers.average_pooling2d(
-        middle_output, (2, 2), (2, 2), padding='same')
+    # Global Average Pooling
+    # Input  8x8x2048
+    # Output 1x2048
+    avgPool = tf.reduce_mean(middle_output, axis=[1, 2])
 
-    logits1 = tf.layers.dense(
-        inputs=avgPool,
-        units=350,
-        activation=tf.nn.relu)
+    # Batch Normalization
+    bn1 = tf.layers.batch_normalization(
+        avgPool, training=mode == tf.estimator.ModeKeys.TRAIN)
 
+    # Dense, FC
+    # Input  1x2048
+    # Output 1x128
+    logits1 = tf.layers.dense(inputs=avgPool, units=128,
+                              activation=tf.nn.relu)
+    # Dropout
     dropout1 = tf.layers.dropout(
-        inputs=logits1, rate=0.4, training=mode == tf.estimator.ModeKeys.TRAIN)
+        inputs=logits1, rate=0.5, training=mode == tf.estimator.ModeKeys.TRAIN)
 
-    flatten = tf.layers.flatten(dropout1)
+    # Dense, FC
+    # Input  1x128
+    # Output 1x64
+    logits2 = tf.layers.dense(inputs=dropout1, units=64,
+                              activation=tf.nn.relu)
+    # Dropout 2
+    dropout2 = tf.layers.dropout(
+        inputs=logits2, rate=0.5, training=mode == tf.estimator.ModeKeys.TRAIN)
 
-    logits = tf.layers.dense(inputs=flatten, units=3)
+    # Dense, FC, OUTPUT
+    # Input  1x128
+    # Output 1x64
+    logits = tf.layers.dense(inputs=dropout2, units=3)
 
     predictions = {
         # Generate predictions (for PREDICT and EVAL mode)
@@ -66,7 +88,7 @@ def cnn_model_fn(features, labels, mode):
 
     # Configure the Training Op (for TRAIN mode)
     if mode == tf.estimator.ModeKeys.TRAIN:
-        optimizer = tf.train.AdamOptimizer(learning_rate=1e-4)
+        optimizer = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE)
         train_op = optimizer.minimize(
             loss=loss,
             global_step=tf.train.get_global_step())
@@ -97,14 +119,12 @@ def main(unused_argv):
         eval_data, eval_labels = ftest['test_set_x'], ftest['test_set_y']
 
         train_data = np.asarray(train_data, dtype=np.float32)
-        # train_data = train_data/255.
-        # train_data = skimage.color.rgb2gray(train_data)
+        train_data = train_data/255.
         train_labels = np.asarray(
             train_labels, dtype=np.int32).reshape(train_labels.shape[0])
 
         eval_data = np.asarray(eval_data, dtype=np.float32)
-        # eval_data = eval_data/255.
-        # eval_data = skimage.color.rgb2gray(eval_data)
+        eval_data = eval_data/255.
         eval_labels = np.asarray(
             eval_labels, dtype=np.int32).reshape(eval_labels.shape[0])
 
@@ -116,12 +136,6 @@ def main(unused_argv):
         mnist_classifier = tf.estimator.Estimator(
             model_fn=cnn_model_fn,
             model_dir=MODEL_PATH)
-
-        # Hyperparams
-        BATCH_SIZE = 32
-        EPOCHS = 50
-        GLOBAL_STEPS = 1000
-        LEARNING_RATE = 1e-4
 
         # Train the model
         train_input_fn = tf.estimator.inputs.numpy_input_fn(

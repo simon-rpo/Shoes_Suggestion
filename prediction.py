@@ -55,3 +55,11 @@ def predict_image(img):
     for x in predict_results:
         print(x)
         return(x)
+
+
+def getClassesDict():
+    return {
+        0: "Sandals",
+        1: "Sneakers",
+        2: "High Heels"
+    }

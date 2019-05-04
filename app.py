@@ -4,8 +4,9 @@ from flask import redirect, request, url_for, jsonify
 from flask_api import FlaskAPI, exceptions, status
 from werkzeug.utils import secure_filename
 
+import settings
 import prediction
-import buy_suggestion
+import buySuggestion
 
 UPLOAD_FOLDER = os.getenv("UPLOAD_FOLDER")
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
@@ -69,7 +70,7 @@ def upload_file():
                 file.save(filePath)
                 preds = prediction.predict(filePath)
             except Exception as e:
-                pass
+                return e
 
             return response(
                 preds,
@@ -95,9 +96,9 @@ def upload_suggest():
             filePath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             try:
                 file.save(filePath)
-                preds = buy_suggestion.suggest(filePath)
+                preds = buySuggestion.suggest(filePath)
             except Exception as e:
-                pass
+                return e
 
             return responseSugg(
                 preds,
@@ -105,6 +106,15 @@ def upload_suggest():
     return ''
 
 
+@app.route('/api/shoes/classes', methods=['GET'])
+def classes_dict():
+    if request.method == 'GET':
+        return {
+            'url': request.host_url.rstrip('/api/shoes/classes') + url_for('classes_dict'),
+            'data': prediction.getClassesDict()
+        }
+    return ''
+
+
 if __name__ == "__main__":
     app.run()
-
